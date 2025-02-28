@@ -1,0 +1,14 @@
+[project]
+name = "url-shortener"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi[standard]>=0.115.8",
+    "psycopg2-binary>=2.9.10",
+    "pydantic-settings>=2.8.0",
+    "redis[hiredis]>=5.2.1",
+    "ruff>=0.9.6",
+    "sqlmodel>=0.0.22",
+]

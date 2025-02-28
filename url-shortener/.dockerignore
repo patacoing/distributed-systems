@@ -1,0 +1,6 @@
+*.sqlite
+.venv/
+__pycache__
+README.md
+.gitignore
+.git

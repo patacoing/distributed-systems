@@ -1,0 +1,9 @@
+.venv
+.ruff_cache
+**/__pycache__
+.env
+database.sqlite
+data/
+redis-data-1/
+redis-data-2/
+redis-data-3/

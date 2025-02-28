@@ -1,0 +1,101 @@
+x-app: &app
+  image: url-shortener
+  build:
+    context: .
+  restart: always
+  depends_on:
+    - postgres
+    - redis-cluster-creation
+
+x-app-environment: &app-environment
+  DATABASE_URI: postgresql://root:example@postgres
+  CACHE_HOST: redis-1
+  CACHE_PORT: 6379
+
+x-redis: &redis
+  image: redis:latest
+  restart: always
+  command: redis-server --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --appendonly yes
+
+
+
+services:
+  app-1:
+    <<: *app
+    ports:
+      - "8000:8000"
+    environment:
+      <<: *app-environment
+      DATACENTER_ID: 1
+      MACHINE_ID: 1
+  
+  app-2:
+    <<: *app
+    ports:
+      - "8001:8000"
+    environment:
+      <<: *app-environment
+      DATACENTER_ID: 1
+      MACHINE_ID: 2
+
+  app-3:
+    <<: *app
+    ports:
+      - "8002:8000"
+    environment:
+      <<: *app-environment
+      DATACENTER_ID: 1
+      MACHINE_ID: 3
+
+  postgres:
+    image: postgres:latest 
+    environment:
+    - POSTGRES_USER=root
+    - POSTGRES_PASSWORD=example
+    ports:
+      - '5432:5432'
+
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "8080:8080"
+    depends_on:
+      - app-1
+      - app-2
+      - app-3
+
+  redis-cluster-creation:
+    image: redis:latest
+    command: redis-cli -h redis-1 --cluster create redis-1:6379 redis-2:6379 redis-3:6379 --cluster-replicas 0 --cluster-yes
+    depends_on:
+      - redis-1
+      - redis-2
+      - redis-3
+  
+  redis-1:
+    <<: *redis
+    ports:
+      - "6379:6379"
+    volumes: 
+      - redis-data-1:/data
+    
+  redis-2:
+    <<: *redis
+    ports:
+      - "6380:6379"
+    volumes: 
+      - redis-data-2:/data
+  
+  redis-3:
+    <<: *redis
+    ports:
+      - "6381:6379"
+    volumes: 
+      - redis-data-3:/data
+
+volumes:
+  redis-data-1:
+  redis-data-2:
+  redis-data-3:
